@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog-fe/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog-fe/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog-fe/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog-fe/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog-fe/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.14.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"long4health.gitee.io","root":"/blog-fe/","scheme":"Gemini","version":"8.0.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="组件（Component）是对数据和方法的简单封装，是为了减少代码冗余，提高代码复用度对代码进行合理拆分后的产物。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React组件设计">
+<meta property="og:url" content="http://long4health.gitee.io/blog-fe/2020/08/31/react-components/index.html">
+<meta property="og:site_name" content="大前端">
+<meta property="og:description" content="组件（Component）是对数据和方法的简单封装，是为了减少代码冗余，提高代码复用度对代码进行合理拆分后的产物。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://long4health.gitee.io/blog-fe/2020/08/31/react-components/components.jpg">
+<meta property="article:published_time" content="2020-08-31T02:50:57.048Z">
+<meta property="article:modified_time" content="2020-09-01T07:28:44.615Z">
+<meta property="article:author" content="Jason.Wang">
+<meta property="article:tag" content="react">
+<meta property="article:tag" content="组件化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://long4health.gitee.io/blog-fe/2020/08/31/react-components/components.jpg">
+
+
+<link rel="canonical" href="http://long4health.gitee.io/blog-fe/2020/08/31/react-components/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>React组件设计 | 大前端</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/blog-fe/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">大前端</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录码畜生活</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog-fe/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog-fe/tags" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog-fe/categories" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog-fe/archives" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%BB%84%E4%BB%B6%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">为什么需要组件化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E6%83%B3%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">理想的组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#React%E7%BB%84%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">React组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%95%E7%A4%BA%E5%9E%8B%E7%BB%84%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">展示型组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%9E%8B%E7%BB%84%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">容器型组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HOC-%E9%AB%98%E9%98%B6%E7%BB%84%E4%BB%B6"><span class="nav-number">5.1.</span> <span class="nav-text">HOC 高阶组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#render-props"><span class="nav-number">5.2.</span> <span class="nav-text">render props</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E8%80%85%E6%AF%94%E8%BE%83"><span class="nav-number">5.3.</span> <span class="nav-text">两者比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">5.4.</span> <span class="nav-text">案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%BD%E7%94%A8%E7%9A%84%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93"><span class="nav-number">5.5.</span> <span class="nav-text">好用的第三方库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.6.</span> <span class="nav-text">其他实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jason.Wang</p>
+  <div class="site-description" itemprop="description">Code for fun!😭</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog-fe/archives">
+        
+          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog-fe/categories">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog-fe/tags">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://long4health.gitee.io/blog-fe/2020/08/31/react-components/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog-fe/images/avatar.gif">
+      <meta itemprop="name" content="Jason.Wang">
+      <meta itemprop="description" content="Code for fun!😭">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大前端">
+    </span>
+
+    
+    
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          React组件设计
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-31 10:50:57" itemprop="dateCreated datePublished" datetime="2020-08-31T10:50:57+08:00">2020-08-31</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-09-01 15:28:44" itemprop="dateModified" datetime="2020-09-01T15:28:44+08:00">2020-09-01</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/blog-fe/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>组件（Component）是对数据和方法的简单封装，是为了减少代码冗余，提高代码复用度对代码进行合理拆分后的产物。</p>
+<img src="/blog-fe/2020/08/31/react-components/components.jpg" class="" title="components">
+
+<a id="more"></a>
+
+<h2 id="为什么需要组件化"><a href="#为什么需要组件化" class="headerlink" title="为什么需要组件化"></a>为什么需要组件化</h2><p>在开发过程中，我们常常会碰到以下情况：</p>
+<ul>
+<li>页面逻辑越来越多，代码越写越庞大。随着项目的推进，类似的需求所需要的技术人力往往倍数提升，且质量难以得到保证。</li>
+<li>面对新的需求束手束脚，生怕改动会影响别的代码的执行，产生不可预估的bug。</li>
+<li>debug时面对成百甚至上千行的代码不知所措。</li>
+<li>同样的逻辑在多个地方重复拷贝代码，拷贝时看不出问题，一旦功能变更只能含泪挨个修改。效率低不说，还很容易遗漏。</li>
+</ul>
+<blockquote>
+<p>为了解决以上问题，社区在前端组件化的尝试、演进从未停止</p>
+</blockquote>
+<h2 id="理想的组件"><a href="#理想的组件" class="headerlink" title="理想的组件"></a>理想的组件</h2><p>针对以上问题，理想的组件应该具有如下特点：</p>
+<ul>
+<li><strong><em>高内聚</em></strong>，组件通过某些特定的逻辑，对一部分功能（ability）进行组装，进而实现某个特定的独立功能（feature）。组件的基础功能应做到开箱即用，<strong>需要一堆配置才可正常使用的组件有违组件化思想</strong>。</li>
+<li><strong><em>低耦合</em></strong>，组件化开发往往伴随分层思想，我们将具有相同粒度的功能归于一层。同层组件之间不可相互依赖，避免出现“我修改了组件A，所以我还需要修改组件B”的情况。</li>
+<li><strong><em>状态无关</em></strong>，组件如有状态，应自己维护。业务代码只关心业务，不应该在使用组件时还需考虑组件的内部状态。</li>
+</ul>
+<h2 id="React组件"><a href="#React组件" class="headerlink" title="React组件"></a>React组件</h2><p>组件化开发的本质是将代码拆分至更小的粒度已达到分治，复用的目的，组件本身其实是对这种拆分的抽象。<br>在 vue 中，我们有非常多的途径可以达到复用的目的， 比如，我们使用 directive 封装 dom 操作，用 mixin 封装组件间相同的逻辑<br>在 React 中，虽然语法和设计不尽相同，但不变的是 UI 的本质： <strong>展示交互</strong> 和 <strong>数据流转</strong><br>那么由此我们先简单的把组件分为 2 大类别：<strong>展示型组件</strong> 和 <strong>容器型组件</strong></p>
+<h2 id="展示型组件"><a href="#展示型组件" class="headerlink" title="展示型组件"></a>展示型组件</h2><p>展示型组件通常具有如下特点：</p>
+<ul>
+<li>描述外观</li>
+<li>通常具备 DOM 结构和样式，接收 props.children 作为子内容</li>
+<li>不依赖于应用的其他部分，如 Redux</li>
+<li>与数据的加载、流转无关</li>
+<li>使用者通过 props 传入数据控制组件展示，传入回调函数获取事件通知</li>
+<li>尽量不含 state （即便有，也只与该组件的 UI 相关）</li>
+</ul>
+<p>展示型组件相对比较简单，以Antd为例，Antd中我们常用的Spin、Progress、Message等，他们大多只是承载组件的渲染，自身与数据无关，通过传入的 props 改变外观或相应用户的操作。<br>同样的，你也可以自由的在组件嵌套结构里插入组合别的自定义组件</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> styles = &#123;</span><br><span class="line">  backgroundColor: <span class="string">&#x27;#fff&#x27;</span>,</span><br><span class="line">  padding: <span class="number">20</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 简单的functional component</span></span><br><span class="line"><span class="keyword">const</span> FunctionalComponent = <span class="function"><span class="params">props</span> =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;styles&#125;</span>&gt;</span>&#123;props.children&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 或者你更倾向于 class</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ClassComponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">PureComponent</span> </span>&#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;styles&#125;</span>&gt;</span>&#123;this.props.children&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="容器型组件"><a href="#容器型组件" class="headerlink" title="容器型组件"></a>容器型组件</h2><p>容器型组件通常具有如下特点：</p>
+<ul>
+<li>描述工作流程</li>
+<li><strong>没有 DOM 结构(除了包裹用的节点)和样式</strong></li>
+<li>不依赖于应用的其他部分，如 Redux / Context</li>
+<li>自身提供数据及表现函数</li>
+<li>连接 redux / Context 等并向内传递数据和 action</li>
+<li>通常都是有状态的，作为数据源存在</li>
+<li>通常通过 HOC 生成，或使用 render props</li>
+</ul>
+<p>通过这些定义，我们可以发现Antd中的Layout就是一个典型的容器型组件，他内部通过 Context.Provider，为内部组件提供数据和 actions</p>
+<h3 id="HOC-高阶组件"><a href="#HOC-高阶组件" class="headerlink" title="HOC 高阶组件"></a>HOC 高阶组件</h3><p><strong>HOC（high order component）</strong>：接收 component 为入参，并返回一个新的 component 的函数<br>HOC 被用来替代 createClass 时期的 mixin <a target="_blank" rel="noopener" href="https://reactjs.org/blog/2016/07/13/mixins-considered-harmful.html">Mixins Considered Harmful</a>。解决了组件间复用公共数据逻辑的问题。<br>talk is cheap，我们来看一个简单的withUser的HOC实现：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> hoistNonReactStatic <span class="keyword">from</span> <span class="string">&#x27;hoist-non-react-statics&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; Page &#125; <span class="keyword">from</span> <span class="string">&#x27;./components&#x27;</span> <span class="comment">// 一个展示型组件</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> withUser = <span class="function"><span class="params">user</span> =&gt;</span> <span class="function"><span class="params">Component</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">ComponentWithUser</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> displayName = <span class="string">`withUser(<span class="subst">$&#123;Component.displayName || Component.name&#125;</span>)`</span></span><br><span class="line"></span><br><span class="line">    state = &#123;</span><br><span class="line">      user: user || &#123; <span class="attr">name</span>: <span class="string">&#x27;lily&#x27;</span>, logout() &#123;&#125;, getLocation() &#123;&#125; &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Component</span> &#123;<span class="attr">...this.props</span>&#125; <span class="attr">user</span>=<span class="string">&#123;this.state.user&#125;</span> /&gt;</span></span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  hoistNonReactStatic(ComponentWithUser, Component)</span><br><span class="line">  <span class="keyword">return</span> ComponentWithUser</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> UserPage = withUser(Page) <span class="comment">// 漂亮，你得到了一个容器型组件</span></span><br></pre></td></tr></table></figure>
+
+<p>这个函数接受一个组件作为入参，返回值是一个新的函数组件，原有组件内部数据功能不变的前提下，我们通过withUser为这个组件注入了新的数据及功能。</p>
+<p>注意点：</p>
+<ul>
+<li>使用HOC时一大痛点时debug时定位困难，尤其是在HOC层层嵌套的情况下，定位异常变得尤为困难。因此我们需要为组件设定静态属性 displayName，这样有助于 debug 时可以更好的定位到目标组件</li>
+<li>HOC 组件接收到的 props 一定要传递给被包裹的组件</li>
+<li>被包裹的组件的静态属性和方法需要使用 hoistNonReactStatic 提升至 HOC 组件（这也是为何不推荐继承而是使用组合）</li>
+<li>需要额外接收参数请使用柯里化，这样符合 Rambda 演算 Unary 的特性，且可以转换为修饰器函数</li>
+</ul>
+<h3 id="render-props"><a href="#render-props" class="headerlink" title="render props"></a>render props</h3><p>起初它被大量运用在 chenlou 的 react-motion 库中，现在他正式出现在 React 官方文档的高级范式中。<br>他允许组件接收一个或多个函数类型的 props（返回值为组件），可以在容器 render 时，动态的将数据传递给这个函数，由此完成数据传递。<br>一般我们会使用 props.children 作为 render props。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Page &#125; <span class="keyword">from</span> <span class="string">&#x27;./components&#x27;</span> <span class="comment">// 一个展示型组件</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserContainer</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> propTypes = &#123;</span><br><span class="line">    children: PropTypes.func.isRequred</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  state = &#123;</span><br><span class="line">    user: &#123; <span class="attr">name</span>: <span class="string">&#x27;jason&#x27;</span>, logout() &#123;&#125;, getLocation() &#123;&#125; &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">React.Fragment</span>&gt;</span>&#123;this.props.children(this.state.user)&#125;<span class="tag">&lt;/<span class="name">React.Fragment</span>&gt;</span></span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserPage</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">  renderPage = <span class="function"><span class="params">user</span> =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">Page</span> <span class="attr">user</span>=<span class="string">&#123;user&#125;</span> /&gt;</span></span></span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">UserContainer</span>&gt;</span>&#123;this.renderPage&#125;<span class="tag">&lt;/<span class="name">UserContainer</span>&gt;</span></span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意点：</p>
+<ul>
+<li>由于 render props 不寻常的设计，需要为组件声明 propTypes 的 children 属性为 PropTypes.func.isRequred（或在typescript中定义属性为required），以避免错误的使用</li>
+<li>不要使用行内的函数声明，虽然他很简单，但在组件 rerender 时，会重新生成一个函数，造成资源浪费，可以把函数转换成组件的方法</li>
+<li>React.Fragment 为占位标记，不会生成任何结构，符合容器型组件尽量不含 dom 结构的目的</li>
+</ul>
+<h3 id="两者比较"><a href="#两者比较" class="headerlink" title="两者比较"></a>两者比较</h3><blockquote>
+<ul>
+<li>当使用 HOC 修饰 class 组件时，可以使用 es7 的修饰器语法简化代码</li>
+</ul>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@withUser(&#123; <span class="attr">name</span>: <span class="string">&#x27;lily&#x27;</span> &#125;)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Page</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>多个 HOC 同时作用于一个组件时，可以被组合（compose），这得益于函数式编程的特性</li>
+<li>HOC 可以和函数组合一样，组合 N 个 hoc 函数至同一组件，但这样也会带来许多问题诸如 静态属性 的提升，props 的重名问题，同时也会造成 debug 的调用栈过深，以及不知道 props 是从哪一个 HOC 传入的。<strong>所以需要谨慎设计你的 HOC</strong></li>
+<li>render props 的特性使得他能够够好的支撑运行时，而不像 HOC 那样需要静态组合</li>
+<li>个人建议：HOC 可以作为顶层的数据和方法传入，而 render props 则适合局部的数据传递</li>
+</ul>
+</blockquote>
+<h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><ul>
+<li>Container with restful resource</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> withService = <span class="function">(<span class="params">&#123; url, params &#125;</span>) =&gt;</span> <span class="function"><span class="params">BaseComponent</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">class</span> <span class="title">ComponentWithService</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">      <span class="built_in">this</span>.initialSnapshot = &#123; params &#125;</span><br><span class="line">      <span class="built_in">this</span>.state = &#123;</span><br><span class="line">        data: <span class="literal">null</span>,</span><br><span class="line">        params</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    state = &#123;</span><br><span class="line">      data: <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">      <span class="built_in">this</span>.fetchData()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidUpdate(prevProps, prevState) &#123;</span><br><span class="line">      <span class="keyword">if</span> (!_.isEqual(prevState.params, <span class="built_in">this</span>.state.params)) &#123;</span><br><span class="line">        <span class="built_in">this</span>.fetchData()</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fetchData = <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> data = <span class="keyword">await</span> client.post(url, <span class="built_in">this</span>.state.params)</span><br><span class="line">      <span class="built_in">this</span>.setState(&#123; data &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    setParams = <span class="function"><span class="params">newParams</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">this</span>.setState(&#123;</span><br><span class="line">        params: &#123; ...this.state.params, ...newParams &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    refresh = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">this</span>.setState(&#123;</span><br><span class="line">        params: <span class="built_in">this</span>.initialSnapshot.params</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">      <span class="keyword">const</span> serviceProps = &#123; <span class="attr">state</span>: <span class="built_in">this</span>.state, <span class="attr">setParams</span>: <span class="built_in">this</span>.setParams, <span class="attr">refresh</span>: <span class="built_in">this</span>.refresh &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">BaseComponent</span> &#123;<span class="attr">...this.props</span>&#125; <span class="attr">service</span>=<span class="string">&#123;serviceProps&#125;</span> /&gt;</span></span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ComponentWithService</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Page = <span class="function"><span class="params">props</span> =&gt;</span> <span class="xml"><span class="tag">&lt;<span class="name">Page</span> /&gt;</span></span></span><br><span class="line"></span><br><span class="line">withService(&#123;</span><br><span class="line">  url: <span class="string">&#x27;/api&#x27;</span>,</span><br><span class="line">  params: &#123;</span><br><span class="line">    a: <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)(Page)</span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line">@withService(&#123;</span><br><span class="line">  url: <span class="string">&#x27;/api&#x27;</span>,</span><br><span class="line">  params: &#123;</span><br><span class="line">    a: <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Page</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="好用的第三方库"><a href="#好用的第三方库" class="headerlink" title="好用的第三方库"></a>好用的第三方库</h3><blockquote>
+<p><strong><a target="_blank" rel="noopener" href="https://github.com/acdlite/recompose">recompose</a> 提供了一系列相当实用的 HOC 方法</strong></p>
+</blockquote>
+<h3 id="其他实现"><a href="#其他实现" class="headerlink" title="其他实现"></a>其他实现</h3><p>当然出于 react props 的自由度，还有许多可作为实现组件复用的方法，比如 Component Inject, 或者 Nested Component。但在团队开发过程中，组件复用方式能满足开发需求即可。同样的目的，应尽量避免在项目中四处散落不同的实现。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>采取组件化开发，我们可以得到什么？</p>
+<ul>
+<li>我们的展示型组件将非常容易测试，因为他们不依赖外部状态，只需要传入相应的 props，就可以验证展示的逻辑是否符合预期。</li>
+<li>当我们熟练运用容器化组件，我们会很容易提取出行为层和数据层，使我们的代码分层更准确更清晰</li>
+</ul>
+<p>参考资料：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0">Presentational and Container Components</a></li>
+<li><a target="_blank" rel="noopener" href="https://medium.com/ingenious/a-tale-of-higher-order-components-render-props-a1ba47e8cfeb">A tale of Higher-Order Components &amp; Render Props</a></li>
+</ul>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"184b0bf1af8ec1b45e1f","clientSecret":"163418ea9f14bbe2a5bb609f80cea6e9f3641670","repo":"blog-comments","owner":"wang0122xl","admin":["wang0122xl"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog-fe/tags/react/" rel="tag"># react</a>
+              <a href="/blog-fe/tags/%E7%BB%84%E4%BB%B6%E5%8C%96/" rel="tag"># 组件化</a>
+          </div>
+
+        
+
+    </footer>
+  </article>
+  
+  
+  
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jason.Wang</span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/blog-fe/js/utils.js"></script><script src="/blog-fe/js/motion.js"></script><script src="/blog-fe/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
