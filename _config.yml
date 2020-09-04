@@ -7,14 +7,14 @@ title: 大前端
 subtitle: '记录码畜生活'
 description: 'Code for fun!😭'
 keywords:
-author: Jason.Wang
+author: 喵大快救我
 language: zh-CN
 timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url:  http://long4health.gitee.io/blog-fe
-root: /blog-fe
+url:  https://wang0122xl.github.io/blog
+root: /blog
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -102,8 +102,8 @@ theme: next
 
 plugins:
   gitalk:
-    clientID: 184b0bf1af8ec1b45e1f
-    clientSecret: 163418ea9f14bbe2a5bb609f80cea6e9f3641670
+    clientID: 2ab80f36416f9d0adf91
+    clientSecret: c889674abb4adf7d37625e53aec3ba28f69e3d20
     repo: blog-comments
     owner: wang0122xl
     admin: 
@@ -114,6 +114,6 @@ plugins:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://gitee.com/long4health/blog-fe
+  repo: https://github.com/wang0122xl/blog.git
   branch: blog-page
   message: 'site updated: {{ now("YYYY-MM-DD HH:mm:ss") }}'

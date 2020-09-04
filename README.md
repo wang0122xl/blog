@@ -1,4 +1,4 @@
-# [blog地址](https://github.com/wang0122xl/blog.git)
+# [blog地址](https://wang0122xl.github.io/blog)
 
 > ## 注：blog-page为静态资源发布分支，勿动
 
